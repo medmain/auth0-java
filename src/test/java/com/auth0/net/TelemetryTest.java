@@ -18,17 +18,20 @@ public class TelemetryTest {
         Telemetry telemetry = new Telemetry("auth0-java", "1.0.0");
         String value = telemetry.getValue();
         assertThat(value, is(notNullValue()));
-        assertThat(value, is("eyJuYW1lIjoiYXV0aDAtamF2YSIsImVudiI6eyJqYXZhIjoiMS44In0sInZlcnNpb24iOiIxLjAuMCJ9"));
+        String javaVersion = System.getProperty("java.specification.version");
+        String expectedJson = "{\"name\":\"auth0-java\",\"env\":{\"java\":\"" + javaVersion + "\"},\"version\":\"1.0.0\"}";
+        String expect64value = Base64.getEncoder().encodeToString(expectedJson.getBytes());
+        assertThat(value, is(expect64value));
 
         String completeString = new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
-        TypeReference<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {
+        TypeReference<Map<String, Object>> mapType = new TypeReference<>() {
         };
         Map<String, Object> complete = new ObjectMapper().readValue(completeString, mapType);
         assertThat((String) complete.get("name"), is("auth0-java"));
         assertThat((String) complete.get("version"), is("1.0.0"));
         Map<String, Object> completeEnv = (Map<String, Object>) complete.get("env");
         assertThat((String) completeEnv.get("auth0-java"), is(nullValue()));
-        assertThat((String) completeEnv.get("java"), is("1.8"));
+        assertThat((String) completeEnv.get("java"), is(System.getProperty("java.specification.version")));
     }
 
     @Test
@@ -36,17 +39,20 @@ public class TelemetryTest {
         Telemetry telemetry = new Telemetry("lock", "1.0.0", "2.1.3");
         String value = telemetry.getValue();
         assertThat(value, is(notNullValue()));
-        assertThat(value, is("eyJuYW1lIjoibG9jayIsImVudiI6eyJqYXZhIjoiMS44IiwiYXV0aDAtamF2YSI6IjIuMS4zIn0sInZlcnNpb24iOiIxLjAuMCJ9"));
+        String javaVersion = System.getProperty("java.specification.version");
+        String expectedJson = "{\"name\":\"lock\",\"env\":{\"java\":\"" + javaVersion + "\",\"auth0-java\":\"2.1.3\"},\"version\":\"1.0.0\"}";
+        String expect64value = Base64.getEncoder().encodeToString(expectedJson.getBytes());
+        assertThat(value, is(expect64value));
 
         String completeString = new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
-        TypeReference<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {
+        TypeReference<Map<String, Object>> mapType = new TypeReference<>() {
         };
         Map<String, Object> complete = new ObjectMapper().readValue(completeString, mapType);
         assertThat((String) complete.get("name"), is("lock"));
         assertThat((String) complete.get("version"), is("1.0.0"));
         Map<String, Object> completeEnv = (Map<String, Object>) complete.get("env");
         assertThat((String) completeEnv.get("auth0-java"), is("2.1.3"));
-        assertThat((String) completeEnv.get("java"), is("1.8"));
+        assertThat((String) completeEnv.get("java"), is(System.getProperty("java.specification.version")));
     }
 
     @Test
